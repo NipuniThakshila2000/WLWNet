@@ -6309,7 +6309,7 @@
   function videoOrder(title) {
     const value = String(title || "").toLowerCase();
     const patterns = [
-      /^(\d+)[._\s-]/,
+      /^(\d+)\s*[\)._:\s]/,
       /session\s*(\d+)/,
       /module[_\s]*(\d+)/,
     ];
@@ -6365,7 +6365,7 @@
     value = value.replace(/\b(?:720p|1080p|4k)\b/gi, "");
     value = value.replace(/[_]+/g, " ");
     value = value.replace(/\s+v\d+$/i, "");
-    value = value.replace(/^(\d+)\s*[.\-:]\s*/, "$1. ");
+    value = value.replace(/^(\d+)\s*[.):]\s*/, "$1. ");
     value = value.replace(/^(\d+)\s+/, "$1. ");
     value = value.replace(/\s+/g, " ").trim();
     if (!value) return "Untitled Video";
