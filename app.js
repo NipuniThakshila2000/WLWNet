@@ -6463,18 +6463,32 @@
     const featured = visibleVideos[0] || state.videos[0];
     const countText = `${state.filtered.length} series • ${visibleVideos.length} videos • ${totalParts} parts`;
     const heroStyle = featured?.thumbnailUrl ? ` style="background-image:url('${escapeHtml(featured.thumbnailUrl)}')"` : "";
+    const featuredMeta = featured
+      ? [featured.seriesTitle || featured.category || "Resources", featured.publishedAt ? formatDate(featured.publishedAt) : "", featured.duration ? formatDuration(featured.duration) : ""]
+          .filter(Boolean)
+          .join(" • ")
+      : "";
 
     renderShell(`
       <section class="hero hero-cinema">
         <div class="hero-media"${heroStyle}></div>
         <div class="hero-inner">
-          <p class="eyebrow">WOWLife Watch</p>
-          <h1>${escapeHtml(featured?.title || "Resources")}</h1>
-          <p>${escapeHtml(featured?.description || "Browse WOWLife teaching series and start watching from any collection.")}</p>
-          <div class="hero-actions">
-            ${featured ? `<a class="primary-action" href="${videoUrl(featured)}">${icon("play")} Play</a>` : ""}
-            <a class="secondary-action" href="#library">Browse library</a>
+          <div class="hero-copy">
+            <p class="eyebrow">Featured teaching</p>
+            <h1>${escapeHtml(featured?.title || "Resources")}</h1>
+            ${featuredMeta ? `<div class="hero-meta">${escapeHtml(featuredMeta)}</div>` : ""}
+            <p>${escapeHtml(featured?.description || "Browse WOWLife teaching series and start watching from any collection.")}</p>
+            <div class="hero-actions">
+              ${featured ? `<a class="primary-action" href="${videoUrl(featured)}">${icon("play")} Play now</a>` : ""}
+              <a class="secondary-action" href="#library">Browse library</a>
+            </div>
           </div>
+          ${featured?.thumbnailUrl ? `
+            <a class="hero-poster" href="${videoUrl(featured)}" aria-label="Play ${escapeHtml(featured.title)}">
+              <img src="${escapeHtml(featured.thumbnailUrl)}" alt="${escapeHtml(featured.title)}" />
+              <span>${icon("play")}</span>
+            </a>
+          ` : ""}
         </div>
       </section>
 
