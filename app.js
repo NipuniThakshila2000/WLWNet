@@ -6348,6 +6348,8 @@
       search: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
       home: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
       grid: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect width="7" height="7" x="3" y="3"/><rect width="7" height="7" x="14" y="3"/><rect width="7" height="7" x="14" y="14"/><rect width="7" height="7" x="3" y="14"/></svg>',
+      chevronLeft: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>',
+      chevronRight: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>',
     };
     return icons[name] || "";
   }
@@ -6529,7 +6531,13 @@
         <div class="resource-panel open">
           ${
             available
-              ? `<div class="video-row">${series.videos.map(renderVideoCard).join("")}</div>`
+              ? `
+                <div class="row-shell">
+                  <button class="row-arrow row-arrow-left" type="button" data-row-slide="prev" aria-label="Previous videos">${icon("chevronLeft")}</button>
+                  <div class="video-row">${series.videos.map(renderVideoCard).join("")}</div>
+                  <button class="row-arrow row-arrow-right" type="button" data-row-slide="next" aria-label="Next videos">${icon("chevronRight")}</button>
+                </div>
+              `
               : `<div class="empty-resource">No matched Vimeo videos found for this resource yet.</div>`
           }
         </div>
@@ -6592,6 +6600,18 @@
       card.addEventListener("click", () => {
         const id = card.getAttribute("data-video-id");
         window.location.href = videoUrl({ id });
+      });
+    });
+
+    document.querySelectorAll("[data-row-slide]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const row = button.parentElement?.querySelector(".video-row");
+        if (!row) return;
+        const direction = button.getAttribute("data-row-slide") === "prev" ? -1 : 1;
+        row.scrollBy({
+          left: direction * Math.max(row.clientWidth - 80, 260),
+          behavior: "smooth",
+        });
       });
     });
   }
