@@ -6472,13 +6472,13 @@
           <div class="hero-copy">
             <p class="eyebrow">WOWLife Church</p>
             <h1>
-              <span>Video</span>
-              <span>Library</span>
+              <span>WOWLife</span>
+              <span>Resources</span>
             </h1>
-            <p>Sermons & Teachings to form you in Christ<br />rooted in Scripture, rich in theology, and built to strengthen faith</p>
+            <p>Deep teachings, resource series, and spiritual formation content<br />organized for steady learning and personal transformation</p>
             <label class="hero-search search-box">
               ${icon("search")}
-              <input id="searchInput" type="search" placeholder="Search videos..." value="${escapeHtml(state.search)}" />
+              <input id="searchInput" type="search" placeholder="Search resources..." value="${escapeHtml(state.search)}" />
             </label>
           </div>
         </div>
