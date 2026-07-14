@@ -6357,6 +6357,36 @@
     return `${minutes}:${String(secs).padStart(2, "0")}`;
   }
 
+  function displayTitle(title) {
+    let value = String(title || "").trim();
+    value = value.replace(/\.(mp4|mov|m4v|webm)$/i, "");
+    value = value.replace(/\s*\((?:\d{3,4}p|hd|full hd)\)\s*[_-]?\d*$/i, "");
+    value = value.replace(/\s+v\d+$/i, "");
+    value = value.replace(/\b(?:720p|1080p|4k)\b/gi, "");
+    value = value.replace(/[_]+/g, " ");
+    value = value.replace(/\s+v\d+$/i, "");
+    value = value.replace(/^(\d+)\s*[.\-:]\s*/, "$1. ");
+    value = value.replace(/^(\d+)\s+/, "$1. ");
+    value = value.replace(/\s+/g, " ").trim();
+    if (!value) return "Untitled Video";
+
+    return value
+      .split(" ")
+      .map((word) => {
+        if (/^(cms|q&a|wow|wowlife)$/i.test(word)) return word.toUpperCase();
+        if (/^(tohu|wa-bohu)$/i.test(word)) return word.replace(/\b\w/g, (char) => char.toUpperCase());
+        if (/^v\d+$/i.test(word)) return word.toLowerCase();
+        if (/^\d/.test(word)) return word;
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      })
+      .join(" ")
+      .replace(/\bAnd\b/g, "&")
+      .replace(/\bAt\b/g, "at")
+      .replace(/\bTo\b/g, "to")
+      .replace(/\bIn\b/g, "in")
+      .replace(/\bOf\b/g, "of");
+  }
+
   function escapeHtml(value) {
     return String(value || "")
       .replace(/&/g, "&amp;")
@@ -6458,7 +6488,7 @@
         const titleMatch = !query || series.title.toLowerCase().includes(query);
         const matchingVideos = titleMatch
           ? videos
-          : videos.filter((video) => [video.title, video.description].join(" ").toLowerCase().includes(query));
+          : videos.filter((video) => [video.title, displayTitle(video.title), video.description].join(" ").toLowerCase().includes(query));
         return { ...series, videos: matchingVideos };
       })
       .filter((series) => !query || series.title.toLowerCase().includes(query) || series.videos.length);
@@ -6606,16 +6636,17 @@
   }
 
   function renderVideoCard(video, index) {
+    const title = displayTitle(video.title);
     return `
       <button class="video-card" type="button" data-video-id="${escapeHtml(video.id)}">
         <span class="thumb">
-          <img src="${escapeHtml(video.thumbnailUrl)}" alt="${escapeHtml(video.title)}" loading="lazy" />
+          <img src="${escapeHtml(video.thumbnailUrl)}" alt="${escapeHtml(title)}" loading="lazy" />
           <span class="play-mark">${icon("play")}</span>
           <span class="episode-number">${String(index + 1).padStart(2, "0")}</span>
           ${video.duration ? `<span class="duration">${formatDuration(video.duration)}</span>` : ""}
         </span>
         <span class="card-body">
-          <h3>${escapeHtml(video.title)}</h3>
+          <h3>${escapeHtml(title)}</h3>
           <span class="meta">
             <span>${escapeHtml(video.speaker)}</span>
             ${video.publishedAt ? `<span>${formatDate(video.publishedAt)}</span>` : ""}
@@ -6669,6 +6700,7 @@
 
     const upNext = state.videos.filter((item) => item.id !== video.id).slice(0, 8);
     const embedUrl = buildVimeoEmbedUrl(video, { autoplay: true });
+    const title = displayTitle(video.title);
 
     renderShell(`
       <main class="watch-layout">
@@ -6676,7 +6708,7 @@
           <div class="player-frame">
             <iframe
               src="${escapeHtml(embedUrl)}"
-              title="${escapeHtml(video.title)}"
+              title="${escapeHtml(title)}"
               allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
               referrerpolicy="strict-origin-when-cross-origin"
               loading="eager"
@@ -6685,7 +6717,7 @@
           </div>
           <div class="watch-copy">
             <p class="eyebrow">Now watching</p>
-            <h1>${escapeHtml(video.title)}</h1>
+            <h1>${escapeHtml(title)}</h1>
             <div class="meta">
               <span>${escapeHtml(video.speaker)}</span>
               ${video.publishedAt ? `<span>${formatDate(video.publishedAt)}</span>` : ""}
@@ -6706,11 +6738,12 @@
   }
 
   function renderNextItem(video) {
+    const title = displayTitle(video.title);
     return `
       <a class="next-item" href="${videoUrl(video)}">
-        <img src="${escapeHtml(video.thumbnailUrl)}" alt="${escapeHtml(video.title)}" loading="lazy" />
+        <img src="${escapeHtml(video.thumbnailUrl)}" alt="${escapeHtml(title)}" loading="lazy" />
         <span>
-          <strong>${escapeHtml(video.title)}</strong>
+          <strong>${escapeHtml(title)}</strong>
           <span>${formatDate(video.publishedAt)}</span>
         </span>
       </a>
