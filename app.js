@@ -6463,6 +6463,10 @@
     return url.toString();
   }
 
+  function thumbnailSrc(video) {
+    return video?.thumbnailUrl || LOGO_URL;
+  }
+
   function createAdHocVimeoVideo(reference) {
     const parsed = parseVimeoReference(reference);
     if (!parsed) return null;
@@ -6521,7 +6525,7 @@
     const visibleVideos = flattenSeriesVideos(state.filtered);
     const featured = visibleVideos[0] || state.videos[0];
     const countText = `${state.filtered.length} series • ${visibleVideos.length} videos • ${totalParts} parts`;
-    const heroStyle = featured?.thumbnailUrl ? ` style="background-image:url('${escapeHtml(featured.thumbnailUrl)}')"` : "";
+    const heroStyle = featured ? ` style="background-image:url('${escapeHtml(thumbnailSrc(featured))}')"` : "";
 
     renderShell(`
       <section class="hero hero-cinema">
@@ -6640,7 +6644,7 @@
     return `
       <button class="video-card" type="button" data-video-id="${escapeHtml(video.id)}">
         <span class="thumb">
-          <img src="${escapeHtml(video.thumbnailUrl)}" alt="${escapeHtml(title)}" loading="lazy" />
+          <img src="${escapeHtml(thumbnailSrc(video))}" alt="${escapeHtml(title)}" loading="lazy" decoding="async" />
           <span class="play-mark">${icon("play")}</span>
           <span class="episode-number">${String(index + 1).padStart(2, "0")}</span>
           ${video.duration ? `<span class="duration">${formatDuration(video.duration)}</span>` : ""}
@@ -6741,7 +6745,7 @@
     const title = displayTitle(video.title);
     return `
       <a class="next-item" href="${videoUrl(video)}">
-        <img src="${escapeHtml(video.thumbnailUrl)}" alt="${escapeHtml(title)}" loading="lazy" />
+        <img src="${escapeHtml(thumbnailSrc(video))}" alt="${escapeHtml(title)}" loading="lazy" decoding="async" />
         <span>
           <strong>${escapeHtml(title)}</strong>
           <span>${formatDate(video.publishedAt)}</span>
