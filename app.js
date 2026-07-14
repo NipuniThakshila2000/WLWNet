@@ -6235,6 +6235,8 @@
     search: "",
     sort: "latest",
     openSeries: "",
+    searchSelection: null,
+    searchTimer: 0,
   };
 
   const app = document.getElementById("app");
@@ -6396,6 +6398,15 @@
       .replace(/'/g, "&#039;");
   }
 
+  function searchable(value) {
+    return String(value || "")
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  }
+
   function icon(name) {
     const icons = {
       play: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
@@ -6485,17 +6496,17 @@
   }
 
   function applyFilters() {
-    const query = state.search.trim().toLowerCase();
+    const query = searchable(state.search);
     state.filtered = state.series
       .map((series) => {
         const videos = series.videos || [];
-        const titleMatch = !query || series.title.toLowerCase().includes(query);
+        const titleMatch = !query || searchable(series.title).includes(query);
         const matchingVideos = titleMatch
           ? videos
-          : videos.filter((video) => [video.title, displayTitle(video.title), video.description].join(" ").toLowerCase().includes(query));
+          : videos.filter((video) => searchable([video.title, displayTitle(video.title), video.description, video.speaker].join(" ")).includes(query));
         return { ...series, videos: matchingVideos };
       })
-      .filter((series) => !query || series.title.toLowerCase().includes(query) || series.videos.length);
+      .filter((series) => !query || searchable(series.title).includes(query) || series.videos.length);
   }
 
   function renderShell(inner) {
@@ -6666,9 +6677,22 @@
     const sortSelect = document.getElementById("sortSelect");
 
     searchInput?.addEventListener("input", (event) => {
-      state.search = event.target.value;
-      renderHome();
-      document.getElementById("searchInput")?.focus();
+      const input = event.target;
+      state.search = input.value;
+      state.searchSelection = {
+        start: input.selectionStart,
+        end: input.selectionEnd,
+      };
+      window.clearTimeout(state.searchTimer);
+      state.searchTimer = window.setTimeout(() => {
+        renderHome();
+        const nextInput = document.getElementById("searchInput");
+        if (!nextInput) return;
+        nextInput.focus();
+        if (state.searchSelection) {
+          nextInput.setSelectionRange(state.searchSelection.start, state.searchSelection.end);
+        }
+      }, 120);
     });
 
     sortSelect?.addEventListener("change", (event) => {
