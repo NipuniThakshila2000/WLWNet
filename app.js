@@ -6292,8 +6292,32 @@
   function normalizeSeries(seriesList) {
     return seriesList.map((series) => ({
       ...series,
-      videos: normalizeVideos(series.videos || []),
+      videos: sortSeriesVideos(normalizeVideos(series.videos || [])),
     }));
+  }
+
+  function sortSeriesVideos(videos) {
+    return videos
+      .map((video, index) => ({ video, index, order: videoOrder(video.title) }))
+      .sort((a, b) => {
+        if (a.order !== b.order) return a.order - b.order;
+        return a.index - b.index;
+      })
+      .map((item) => item.video);
+  }
+
+  function videoOrder(title) {
+    const value = String(title || "").toLowerCase();
+    const patterns = [
+      /^(\d+)[._\s-]/,
+      /session\s*(\d+)/,
+      /module[_\s]*(\d+)/,
+    ];
+    for (const pattern of patterns) {
+      const match = value.match(pattern);
+      if (match) return Number(match[1]);
+    }
+    return Number.MAX_SAFE_INTEGER;
   }
 
   function flattenSeriesVideos(seriesList) {
@@ -6581,12 +6605,13 @@
     `;
   }
 
-  function renderVideoCard(video) {
+  function renderVideoCard(video, index) {
     return `
       <button class="video-card" type="button" data-video-id="${escapeHtml(video.id)}">
         <span class="thumb">
           <img src="${escapeHtml(video.thumbnailUrl)}" alt="${escapeHtml(video.title)}" loading="lazy" />
           <span class="play-mark">${icon("play")}</span>
+          <span class="episode-number">${String(index + 1).padStart(2, "0")}</span>
           ${video.duration ? `<span class="duration">${formatDuration(video.duration)}</span>` : ""}
         </span>
         <span class="card-body">

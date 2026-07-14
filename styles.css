@@ -680,6 +680,22 @@ iframe {
   font-weight: 800;
 }
 
+.episode-number {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  min-width: 34px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0 8px;
+  color: #0b0b0c;
+  background: rgba(200, 160, 8, 0.94);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .card-body {
   display: grid;
   gap: 8px;
