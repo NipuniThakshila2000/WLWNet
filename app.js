@@ -6353,7 +6353,8 @@
   }
 
   function videoUrl(video) {
-    return `#watch/${encodeURIComponent(video.id)}`;
+    const watchPath = `/watch/${encodeURIComponent(video.id)}`;
+    return window.location.protocol === "file:" ? `#${watchPath}` : watchPath;
   }
 
   function parseVimeoReference(value) {
@@ -6590,7 +6591,7 @@
     document.querySelectorAll("[data-video-id]").forEach((card) => {
       card.addEventListener("click", () => {
         const id = card.getAttribute("data-video-id");
-        window.location.hash = videoUrl({ id });
+        window.location.href = videoUrl({ id });
       });
     });
   }
@@ -6663,9 +6664,11 @@
   }
 
   function route() {
-    const hash = window.location.hash.replace(/^#\/?/, "");
-    if (hash.startsWith("watch/")) {
-      renderWatch(decodeURIComponent(hash.slice("watch/".length)));
+    const hashRoute = window.location.hash.replace(/^#\/?/, "");
+    const pathRoute = window.location.pathname.replace(/^\/+/, "");
+    const activeRoute = pathRoute.startsWith("watch/") ? pathRoute : hashRoute;
+    if (activeRoute.startsWith("watch/")) {
+      renderWatch(decodeURIComponent(activeRoute.slice("watch/".length)));
       window.scrollTo({ top: 0, behavior: "auto" });
       return;
     }
@@ -6684,6 +6687,7 @@
   }
 
   window.addEventListener("hashchange", route);
+  window.addEventListener("popstate", route);
 
   state.series = normalizeSeries(getEmbeddedResourceSeries());
   state.videos = flattenSeriesVideos(state.series);
