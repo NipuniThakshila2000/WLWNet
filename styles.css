@@ -457,11 +457,6 @@ iframe {
   display: block;
 }
 
-.row-shell {
-  position: relative;
-  min-width: 0;
-}
-
 .video-row {
   display: flex;
   gap: 12px;
@@ -469,45 +464,26 @@ iframe {
   overflow-y: visible;
   padding: 2px 2px 18px;
   scroll-snap-type: x proximity;
-  scrollbar-width: none;
+  scrollbar-color: rgba(255, 255, 255, 0.28) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
 }
 
 .video-row::-webkit-scrollbar {
-  display: none;
+  height: 8px;
 }
 
-.row-arrow {
-  position: absolute;
-  top: 2px;
-  bottom: 18px;
-  z-index: 4;
-  width: 54px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.62);
-  opacity: 0;
-  transition: opacity 0.18s, background 0.18s;
+.video-row::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
 }
 
-.row-shell:hover .row-arrow,
-.row-arrow:focus-visible {
-  opacity: 1;
+.video-row::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
 }
 
-.row-arrow:hover {
-  background: rgba(0, 0, 0, 0.82);
-}
-
-.row-arrow-left {
-  left: 0;
-  border-radius: var(--radius) 0 0 var(--radius);
-}
-
-.row-arrow-right {
-  right: 0;
-  border-radius: 0 var(--radius) var(--radius) 0;
+.video-row::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 160, 8, 0.7);
 }
 
 .video-grid {
