@@ -6357,6 +6357,10 @@
     return window.location.protocol === "file:" ? `#${watchPath}` : watchPath;
   }
 
+  function homeUrl() {
+    return window.location.protocol === "file:" ? "#/" : "/";
+  }
+
   function parseVimeoReference(value) {
     const raw = String(value || "").trim();
     const match = raw.match(/(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)?(\d+)(?::([a-z0-9]+)|[?&]h=([a-z0-9]+))?/i);
@@ -6433,16 +6437,16 @@
     app.innerHTML = `
       <div class="app-shell">
         <header class="topbar">
-          <a class="brand-link" href="#/">
+          <a class="brand-link" href="${homeUrl()}">
             <img class="brand-logo" src="${LOGO_URL}" alt="WOWLife" />
             <span class="brand-copy">
               <span class="brand-title">WOWLife</span>
-              <span class="brand-kicker">Resources</span>
+              <span class="brand-kicker">Watch</span>
             </span>
           </a>
           <div class="top-actions">
             <a class="nav-button" href="https://www.wowlife.lk">${icon("home")} Home</a>
-            <a class="nav-button" href="#/">${icon("grid")} Resources</a>
+            <a class="nav-button" href="${homeUrl()}">${icon("grid")} Browse</a>
           </div>
         </header>
         ${inner}
@@ -6453,15 +6457,22 @@
   function renderHome() {
     applyFilters();
     const totalParts = state.series.reduce((sum, series) => sum + series.parts, 0);
-    const countText = `${state.filtered.length} ${state.filtered.length === 1 ? "series" : "series"} • ${totalParts} total parts`;
+    const visibleVideos = flattenSeriesVideos(state.filtered);
+    const featured = visibleVideos[0] || state.videos[0];
+    const countText = `${state.filtered.length} series • ${visibleVideos.length} videos • ${totalParts} parts`;
+    const heroStyle = featured?.thumbnailUrl ? ` style="background-image:url('${escapeHtml(featured.thumbnailUrl)}')"` : "";
 
     renderShell(`
-      <section class="hero">
-        <div class="hero-media hero-media-resource"></div>
+      <section class="hero hero-cinema">
+        <div class="hero-media"${heroStyle}></div>
         <div class="hero-inner">
-          <p class="eyebrow">WOWLife Church</p>
-          <h1>Resources</h1>
-          <p>Comprehensive WOWLife teaching series organized by title and part count.</p>
+          <p class="eyebrow">WOWLife Watch</p>
+          <h1>${escapeHtml(featured?.title || "Resources")}</h1>
+          <p>${escapeHtml(featured?.description || "Browse WOWLife teaching series and start watching from any collection.")}</p>
+          <div class="hero-actions">
+            ${featured ? `<a class="primary-action" href="${videoUrl(featured)}">${icon("play")} Play</a>` : ""}
+            <a class="secondary-action" href="#library">Browse library</a>
+          </div>
         </div>
       </section>
 
@@ -6472,13 +6483,13 @@
         </label>
       </div>
 
-      <main class="content">
+      <main class="content streaming-content" id="library">
         <div class="filters">
-          <button class="chip active" type="button">Resources</button>
+          <button class="chip active" type="button">All Resources</button>
         </div>
         <div class="section-head">
           <div>
-            <h2>Resource Library</h2>
+            <h2>Continue Watching</h2>
             <p>${countText}</p>
           </div>
         </div>
@@ -6507,21 +6518,18 @@
 
   function renderResourceSection(series) {
     const available = series.videos?.length || 0;
-    const seriesId = series.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    const isOpen = state.openSeries === series.title;
     return `
       <section class="resource-section">
-        <button class="resource-section-head" type="button" data-series-title="${escapeHtml(series.title)}" aria-expanded="${isOpen ? "true" : "false"}" aria-controls="series-${escapeHtml(seriesId)}">
+        <div class="resource-section-head">
           <div>
             <h3>${escapeHtml(series.title)}</h3>
             <p>${series.parts} ${series.parts === 1 ? "Part" : "Parts"}${available ? ` • ${available} video${available === 1 ? "" : "s"}` : ""}</p>
           </div>
-          <span class="resource-toggle" aria-hidden="true">${isOpen ? "−" : "+"}</span>
-        </button>
-        <div id="series-${escapeHtml(seriesId)}" class="resource-panel ${isOpen ? "open" : ""}">
+        </div>
+        <div class="resource-panel open">
           ${
             available
-              ? `<div class="video-grid resource-video-grid">${series.videos.map(renderVideoCard).join("")}</div>`
+              ? `<div class="video-row">${series.videos.map(renderVideoCard).join("")}</div>`
               : `<div class="empty-resource">No matched Vimeo videos found for this resource yet.</div>`
           }
         </div>
@@ -6578,14 +6586,6 @@
     sortSelect?.addEventListener("change", (event) => {
       state.sort = event.target.value;
       renderHome();
-    });
-
-    document.querySelectorAll("[data-series-title]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const title = button.getAttribute("data-series-title");
-        state.openSeries = state.openSeries === title ? "" : title;
-        renderHome();
-      });
     });
 
     document.querySelectorAll("[data-video-id]").forEach((card) => {
