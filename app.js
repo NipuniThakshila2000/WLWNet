@@ -6519,14 +6519,18 @@
     return `
       <div class="library-layout">
         <aside class="series-nav" aria-label="Resource series">
-          <h3>Series</h3>
+          <div class="series-nav-head">
+            <span>Browse by series</span>
+            <strong>${seriesList.length}</strong>
+          </div>
           <div class="series-nav-list">
             ${seriesList
               .map(
-                (series) => `
+                (series, index) => `
                   <a href="#${escapeHtml(seriesSlug(series.title))}">
+                    <em>${String(index + 1).padStart(2, "0")}</em>
                     <span>${escapeHtml(series.title)}</span>
-                    <small>${series.videos?.length || 0}</small>
+                    <small>${series.videos?.length || 0} videos</small>
                   </a>
                 `,
               )
