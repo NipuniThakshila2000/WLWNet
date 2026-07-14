@@ -6463,41 +6463,27 @@
     const featured = visibleVideos[0] || state.videos[0];
     const countText = `${state.filtered.length} series • ${visibleVideos.length} videos • ${totalParts} parts`;
     const heroStyle = featured?.thumbnailUrl ? ` style="background-image:url('${escapeHtml(featured.thumbnailUrl)}')"` : "";
-    const featuredMeta = featured
-      ? [featured.seriesTitle || featured.category || "Resources", featured.publishedAt ? formatDate(featured.publishedAt) : "", featured.duration ? formatDuration(featured.duration) : ""]
-          .filter(Boolean)
-          .join(" • ")
-      : "";
 
     renderShell(`
       <section class="hero hero-cinema">
         <div class="hero-media"${heroStyle}></div>
+        <div class="hero-noise" aria-hidden="true"></div>
         <div class="hero-inner">
           <div class="hero-copy">
-            <p class="eyebrow">Featured teaching</p>
-            <h1>${escapeHtml(featured?.title || "Resources")}</h1>
-            ${featuredMeta ? `<div class="hero-meta">${escapeHtml(featuredMeta)}</div>` : ""}
-            <p>${escapeHtml(featured?.description || "Browse WOWLife teaching series and start watching from any collection.")}</p>
-            <div class="hero-actions">
-              ${featured ? `<a class="primary-action" href="${videoUrl(featured)}">${icon("play")} Play now</a>` : ""}
-              <a class="secondary-action" href="#library">Browse library</a>
-            </div>
+            <p class="eyebrow">WOWLife Church</p>
+            <h1>
+              <span>Video</span>
+              <span>Library</span>
+            </h1>
+            <p>Sermons & Teachings to form you in Christ<br />rooted in Scripture, rich in theology, and built to strengthen faith</p>
+            <label class="hero-search search-box">
+              ${icon("search")}
+              <input id="searchInput" type="search" placeholder="Search videos..." value="${escapeHtml(state.search)}" />
+            </label>
           </div>
-          ${featured?.thumbnailUrl ? `
-            <a class="hero-poster" href="${videoUrl(featured)}" aria-label="Play ${escapeHtml(featured.title)}">
-              <img src="${escapeHtml(featured.thumbnailUrl)}" alt="${escapeHtml(featured.title)}" />
-              <span>${icon("play")}</span>
-            </a>
-          ` : ""}
         </div>
+        <div class="scroll-cue" aria-hidden="true"><span></span></div>
       </section>
-
-      <div class="search-row">
-        <label class="search-box">
-          ${icon("search")}
-          <input id="searchInput" type="search" placeholder="Search resources..." value="${escapeHtml(state.search)}" />
-        </label>
-      </div>
 
       <main class="content streaming-content" id="library">
         <div class="filters">

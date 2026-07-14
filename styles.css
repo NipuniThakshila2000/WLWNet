@@ -1,15 +1,32 @@
 :root {
-  --bg: #050505;
-  --surface: #121212;
+  --bg: #0b0b0c;
+  --surface: #111113;
   --surface-2: #1b1b1b;
   --text: #f7f7f7;
   --muted: rgba(247, 247, 247, 0.68);
   --soft: rgba(247, 247, 247, 0.1);
   --border: rgba(247, 247, 247, 0.12);
+  --nav-bg: #121f36;
   --brand: #c8a008;
-  --brand-2: #f0c83b;
+  --brand-2: #a88806;
   --danger: #e50914;
   --radius: 8px;
+}
+
+@font-face {
+  font-family: "Canela";
+  src: url("https://videos.wowlife.lk/fonts/Canela-Light-Trial.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "The Gate of the Moon";
+  src: url("https://videos.wowlife.lk/fonts/The%20Gate%20of%20the%20Moon.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 * {
@@ -80,18 +97,20 @@ iframe {
 }
 
 .topbar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
-  height: 72px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   padding: 0 46px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.62));
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px);
+  background: var(--nav-bg, #121f36);
+  border-bottom: 0;
+  backdrop-filter: none;
 }
 
 .brand-link {
@@ -170,46 +189,44 @@ iframe {
 
 .hero {
   position: relative;
-  min-height: 660px;
-  display: grid;
-  align-items: end;
+  height: 60vh;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  margin-top: -72px;
-  padding-top: 72px;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .hero-media {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(135deg, rgba(17, 17, 17, 0.78), rgba(0, 0, 0, 0.24)),
-    radial-gradient(circle at 72% 28%, rgba(200, 160, 8, 0.2), transparent 30%);
+    linear-gradient(135deg, rgba(17, 17, 17, 0.7), rgba(0, 0, 0, 0.2)),
+    url("https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=1920&q=80");
   background-size: cover;
-  background-position: center right;
-  opacity: 0.72;
-  transform: scale(1.02);
-  filter: saturate(1.08) contrast(1.04);
+  background-position: center;
+  opacity: 0.4;
+  transform: scale(1.05);
+  filter: saturate(1.02) contrast(1.02);
 }
 
 .hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.72) 34%, rgba(0, 0, 0, 0.2) 74%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.32) 0%, rgba(5, 5, 5, 0.16) 54%, var(--bg) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5), var(--bg));
 }
 
 .hero-inner {
   position: relative;
   z-index: 2;
-  width: min(1220px, calc(100% - 64px));
+  width: min(768px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 136px 0 94px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
-  gap: 54px;
-  align-items: end;
+  padding: 0;
+  display: block;
+  text-align: center;
 }
 
 .hero-copy {
@@ -217,118 +234,109 @@ iframe {
 }
 
 .eyebrow {
-  color: var(--brand-2);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin: 0 0 12px;
+  color: #fff;
+  font-family: Canela, Georgia, serif;
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: 0.025em;
+  text-transform: none;
+  margin: 0 0 16px;
 }
 
 .hero h1 {
-  max-width: 820px;
   margin: 0;
-  font-size: clamp(42px, 6.2vw, 82px);
-  line-height: 0.98;
-  font-weight: 900;
-  text-wrap: balance;
-  text-shadow: 0 10px 34px rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-family: Canela, Georgia, serif;
+  font-weight: 300;
+  line-height: 1.08;
+  text-shadow: 0 12px 42px rgba(0, 0, 0, 0.55);
 }
 
-.hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 13px;
-  font-weight: 800;
+.hero h1 span:first-child {
+  display: block;
+  margin-bottom: -0.35em;
+  font-size: clamp(48px, 8vw, 96px);
+}
+
+.hero h1 span:last-child {
+  display: block;
+  margin-left: 64px;
+  color: var(--brand);
+  font-family: "The Gate of the Moon", "Brush Script MT", cursive;
+  font-size: clamp(64px, 10vw, 128px);
+  font-weight: 400;
 }
 
 .hero p {
-  max-width: 620px;
-  min-height: 30px;
-  margin: 16px 0 0;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 17px;
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  max-width: 576px;
+  min-height: 0;
+  margin: 18px auto 32px;
+  color: var(--muted);
+  font-family: Canela, Georgia, serif;
+  font-size: 20px;
+  line-height: 1.45;
+  overflow: visible;
 }
 
-.hero-actions {
-  margin-top: 30px;
-}
-
-.primary-action,
-.secondary-action {
-  min-width: 122px;
-  min-height: 46px;
-  padding: 0 18px;
-}
-
-.primary-action {
-  background: #fff;
-  color: #050505;
-  border-color: #fff;
-}
-
-.primary-action:hover,
-.secondary-action:hover {
-  transform: translateY(-1px);
-}
-
-.secondary-action {
-  background: rgba(109, 109, 110, 0.72);
-  border-color: rgba(255, 255, 255, 0.18);
-}
-
-.hero-poster {
+.hero-search {
   position: relative;
-  display: block;
-  aspect-ratio: 16 / 9;
-  border-radius: 8px;
-  overflow: hidden;
-  color: #050505;
-  background: #000;
-  outline: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.56);
-  transform: translateY(12px);
-  transition: transform 0.18s, outline-color 0.18s;
+  max-width: 448px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
 }
 
-.hero-poster:hover,
-.hero-poster:focus-visible {
-  transform: translateY(8px);
-  outline-color: rgba(240, 200, 59, 0.78);
+.hero-search input {
+  padding-block: 2px;
+  font-size: 14px;
 }
 
-.hero-poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.hero-poster::after {
-  content: "";
+.hero-noise {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 44%, rgba(0, 0, 0, 0.48));
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
 }
 
-.hero-poster span {
+.scroll-cue {
   position: absolute;
-  left: 18px;
-  bottom: 18px;
+  left: 50%;
+  bottom: 32px;
   z-index: 2;
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
+  width: 24px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
+  transform: translateX(-50%);
+}
+
+.scroll-cue span {
+  width: 4px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--brand);
+  animation: cue-bounce 2s infinite;
+}
+
+@keyframes cue-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(8px);
+  }
 }
 
 .search-row {
@@ -730,13 +738,7 @@ iframe {
   }
 
   .hero-inner {
-    grid-template-columns: 1fr;
-    gap: 30px;
-  }
-
-  .hero-poster {
-    width: min(520px, 100%);
-    transform: none;
+    width: min(768px, calc(100% - 40px));
   }
 
   .watch-layout {
@@ -768,9 +770,8 @@ iframe {
   }
 
   .hero {
-    min-height: 560px;
-    margin-top: -64px;
-    padding-top: 64px;
+    height: 60vh;
+    min-height: 460px;
   }
 
   .hero-inner,
@@ -781,29 +782,21 @@ iframe {
   }
 
   .hero-inner {
-    padding: 98px 0 70px;
-    gap: 24px;
+    width: min(100% - 28px, 768px);
   }
 
-  .hero h1 {
-    font-size: clamp(34px, 11vw, 54px);
+  .hero h1 span:first-child {
+    font-size: clamp(46px, 16vw, 68px);
+  }
+
+  .hero h1 span:last-child {
+    margin-left: 34px;
+    font-size: clamp(62px, 19vw, 88px);
   }
 
   .hero p {
     font-size: 15px;
-    -webkit-line-clamp: 4;
-  }
-
-  .hero-meta {
-    font-size: 12px;
-  }
-
-  .hero-poster {
-    display: none;
-  }
-
-  .search-row {
-    margin-top: -24px;
+    margin-bottom: 24px;
   }
 
   .section-head {
