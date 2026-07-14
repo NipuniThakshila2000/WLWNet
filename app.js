@@ -6361,6 +6361,13 @@
     return window.location.protocol === "file:" ? "#/" : "/";
   }
 
+  function seriesSlug(title) {
+    return `series-${String(title || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")}`;
+  }
+
   function parseVimeoReference(value) {
     const raw = String(value || "").trim();
     const match = raw.match(/(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)?(\d+)(?::([a-z0-9]+)|[?&]h=([a-z0-9]+))?/i);
@@ -6510,8 +6517,25 @@
     }
 
     return `
-      <div class="resource-sections">
-        ${seriesList.map(renderResourceSection).join("")}
+      <div class="library-layout">
+        <aside class="series-nav" aria-label="Resource series">
+          <h3>Series</h3>
+          <div class="series-nav-list">
+            ${seriesList
+              .map(
+                (series) => `
+                  <a href="#${escapeHtml(seriesSlug(series.title))}">
+                    <span>${escapeHtml(series.title)}</span>
+                    <small>${series.videos?.length || 0}</small>
+                  </a>
+                `,
+              )
+              .join("")}
+          </div>
+        </aside>
+        <div class="resource-sections">
+          ${seriesList.map(renderResourceSection).join("")}
+        </div>
       </div>
     `;
   }
@@ -6519,7 +6543,7 @@
   function renderResourceSection(series) {
     const available = series.videos?.length || 0;
     return `
-      <section class="resource-section">
+      <section class="resource-section" id="${escapeHtml(seriesSlug(series.title))}">
         <div class="resource-section-head">
           <div>
             <h3>${escapeHtml(series.title)}</h3>
