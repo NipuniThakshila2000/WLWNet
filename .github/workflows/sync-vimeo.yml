@@ -1,0 +1,45 @@
+name: Sync Vimeo videos
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-vimeo-videos
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Pull Deep Dives from Vimeo
+        run: node scripts/pull-vimeo-folder.mjs
+        env:
+          VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
+          VIMEO_USER_ID: ${{ vars.VIMEO_USER_ID }}
+
+      - name: Sync resource series from Vimeo
+        run: node scripts/sync-resource-series.mjs
+        env:
+          VIMEO_ACCESS_TOKEN: ${{ secrets.VIMEO_ACCESS_TOKEN }}
+          VIMEO_USER_ID: ${{ vars.VIMEO_USER_ID }}
+
+      - name: Commit synced video data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add deep-dives.json resource-series.json app.js mighty-embed.html
+          git diff --cached --quiet || git commit -m "Sync Vimeo videos"
+          git push
