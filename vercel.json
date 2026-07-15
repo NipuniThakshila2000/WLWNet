@@ -5,6 +5,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/playlist/:path*",
+      "destination": "/index.html"
+    },
+    {
       "source": "/spaces/12760353/feed/:path*",
       "destination": "/index.html"
     }

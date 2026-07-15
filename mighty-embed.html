@@ -570,6 +570,18 @@ iframe {
   line-height: 1.25;
 }
 
+.series-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.series-title-link:hover,
+.series-title-link:focus-visible {
+  color: var(--brand-2);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
 .resource-section-head p {
   margin: 5px 0 0;
   color: var(--muted);
@@ -738,6 +750,29 @@ iframe {
   color: var(--brand-2);
 }
 
+.playlist-layout {
+  width: min(1220px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 36px 0 72px;
+}
+
+.playlist-head {
+  margin-bottom: 24px;
+}
+
+.playlist-head h1 {
+  max-width: 900px;
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: clamp(32px, 5vw, 58px);
+  line-height: 1.02;
+}
+
+.playlist-head p {
+  margin: 0 0 18px;
+  color: var(--muted);
+}
+
 .watch-layout {
   width: min(1280px, calc(100% - 64px));
   margin: 0 auto;
@@ -852,6 +887,7 @@ iframe {
   .hero-inner,
   .search-row,
   .content,
+  .playlist-layout,
   .watch-layout {
     width: min(100% - 40px, 1220px);
   }
@@ -7803,11 +7839,20 @@ window.WLWN_RESOURCE_SERIES = [{"title":"CMS Redux","parts":21,"projectId":"2876
     return window.location.protocol === "file:" ? "#/" : "/";
   }
 
+  function playlistUrl(series) {
+    const playlistPath = `/playlist/${encodeURIComponent(seriesSlug(series.title))}`;
+    return window.location.protocol === "file:" ? `#${playlistPath}` : playlistPath;
+  }
+
   function seriesSlug(title) {
     return `series-${String(title || "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")}`;
+  }
+
+  function findSeriesBySlug(slug) {
+    return state.series.find((series) => seriesSlug(series.title) === slug);
   }
 
   function parseVimeoReference(value) {
@@ -7973,7 +8018,7 @@ window.WLWN_RESOURCE_SERIES = [{"title":"CMS Redux","parts":21,"projectId":"2876
             ${seriesList
               .map(
                 (series, index) => `
-                  <a href="#${escapeHtml(seriesSlug(series.title))}">
+                  <a href="${escapeHtml(playlistUrl(series))}">
                     <em>${String(index + 1).padStart(2, "0")}</em>
                     <span>${escapeHtml(series.title)}</span>
                     <small>${series.videos?.length || 0} videos</small>
@@ -7996,7 +8041,7 @@ window.WLWN_RESOURCE_SERIES = [{"title":"CMS Redux","parts":21,"projectId":"2876
       <section class="resource-section" id="${escapeHtml(seriesSlug(series.title))}">
         <div class="resource-section-head">
           <div>
-            <h3>${escapeHtml(series.title)}</h3>
+            <h3><a class="series-title-link" href="${escapeHtml(playlistUrl(series))}">${escapeHtml(series.title)}</a></h3>
             <p>${series.parts} ${series.parts === 1 ? "Part" : "Parts"}${available ? ` • ${available} video${available === 1 ? "" : "s"}` : ""}</p>
           </div>
         </div>
@@ -8025,6 +8070,42 @@ window.WLWN_RESOURCE_SERIES = [{"title":"CMS Redux","parts":21,"projectId":"2876
         ${videos.map(renderVideoCard).join("")}
       </div>
     `;
+  }
+
+  function renderPlaylist(slug) {
+    const series = findSeriesBySlug(slug);
+    if (!series) {
+      renderShell(`
+        <main class="error-state">
+          <div>
+            <h1>Playlist not found</h1>
+            <p>The selected resource series is unavailable.</p>
+            <p><a class="nav-button" href="${homeUrl()}">Back to videos</a></p>
+          </div>
+        </main>
+      `);
+      return;
+    }
+
+    const videos = (series.videos || []).map((video) => ({
+      ...video,
+      seriesTitle: series.title,
+    }));
+    const available = videos.length;
+
+    renderShell(`
+      <main class="playlist-layout">
+        <section class="playlist-head">
+          <p class="eyebrow">Playlist</p>
+          <h1>${escapeHtml(series.title)}</h1>
+          <p>${series.parts} ${series.parts === 1 ? "Part" : "Parts"}${available ? ` • ${available} video${available === 1 ? "" : "s"}` : ""}</p>
+          <a class="nav-button" href="${homeUrl()}">Back to all resources</a>
+        </section>
+        ${available ? renderVideoGrid(videos) : `<div class="empty-resource">No matched Vimeo videos found for this resource yet.</div>`}
+      </main>
+    `);
+
+    bindVideoCardEvents();
   }
 
   function renderVideoCard(video, index) {
@@ -8077,13 +8158,16 @@ window.WLWN_RESOURCE_SERIES = [{"title":"CMS Redux","parts":21,"projectId":"2876
       renderHome();
     });
 
+    bindVideoCardEvents();
+  }
+
+  function bindVideoCardEvents() {
     document.querySelectorAll("[data-video-id]").forEach((card) => {
       card.addEventListener("click", () => {
         const id = card.getAttribute("data-video-id");
         window.location.href = videoUrl({ id });
       });
     });
-
   }
 
   function renderWatch(videoId) {
@@ -8103,7 +8187,10 @@ window.WLWN_RESOURCE_SERIES = [{"title":"CMS Redux","parts":21,"projectId":"2876
       return;
     }
 
-    const upNext = state.videos.filter((item) => item.id !== video.id).slice(0, 8);
+    const sameSeries = video.seriesTitle
+      ? state.videos.filter((item) => item.seriesTitle === video.seriesTitle && item.id !== video.id)
+      : [];
+    const upNext = (sameSeries.length ? sameSeries : state.videos.filter((item) => item.id !== video.id)).slice(0, 12);
     const embedUrl = buildVimeoEmbedUrl(video, { autoplay: true });
     const title = displayTitle(video.title);
 
@@ -8133,7 +8220,7 @@ window.WLWN_RESOURCE_SERIES = [{"title":"CMS Redux","parts":21,"projectId":"2876
           </div>
         </article>
         <aside class="up-next">
-          <h2>Up Next</h2>
+          <h2>${escapeHtml(video.seriesTitle ? `More from ${video.seriesTitle}` : "Up Next")}</h2>
           <div class="next-list">
             ${upNext.map(renderNextItem).join("")}
           </div>
@@ -8158,9 +8245,14 @@ window.WLWN_RESOURCE_SERIES = [{"title":"CMS Redux","parts":21,"projectId":"2876
   function route() {
     const hashRoute = window.location.hash.replace(/^#\/?/, "");
     const pathRoute = window.location.pathname.replace(/^\/+/, "");
-    const activeRoute = pathRoute.startsWith("watch/") ? pathRoute : hashRoute;
+    const activeRoute = pathRoute.startsWith("watch/") || pathRoute.startsWith("playlist/") ? pathRoute : hashRoute;
     if (activeRoute.startsWith("watch/")) {
       renderWatch(decodeURIComponent(activeRoute.slice("watch/".length)));
+      window.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
+    if (activeRoute.startsWith("playlist/")) {
+      renderPlaylist(decodeURIComponent(activeRoute.slice("playlist/".length)));
       window.scrollTo({ top: 0, behavior: "auto" });
       return;
     }

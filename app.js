@@ -6814,11 +6814,20 @@
     return window.location.protocol === "file:" ? "#/" : "/";
   }
 
+  function playlistUrl(series) {
+    const playlistPath = `/playlist/${encodeURIComponent(seriesSlug(series.title))}`;
+    return window.location.protocol === "file:" ? `#${playlistPath}` : playlistPath;
+  }
+
   function seriesSlug(title) {
     return `series-${String(title || "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")}`;
+  }
+
+  function findSeriesBySlug(slug) {
+    return state.series.find((series) => seriesSlug(series.title) === slug);
   }
 
   function parseVimeoReference(value) {
@@ -6984,7 +6993,7 @@
             ${seriesList
               .map(
                 (series, index) => `
-                  <a href="#${escapeHtml(seriesSlug(series.title))}">
+                  <a href="${escapeHtml(playlistUrl(series))}">
                     <em>${String(index + 1).padStart(2, "0")}</em>
                     <span>${escapeHtml(series.title)}</span>
                     <small>${series.videos?.length || 0} videos</small>
@@ -7007,7 +7016,7 @@
       <section class="resource-section" id="${escapeHtml(seriesSlug(series.title))}">
         <div class="resource-section-head">
           <div>
-            <h3>${escapeHtml(series.title)}</h3>
+            <h3><a class="series-title-link" href="${escapeHtml(playlistUrl(series))}">${escapeHtml(series.title)}</a></h3>
             <p>${series.parts} ${series.parts === 1 ? "Part" : "Parts"}${available ? ` • ${available} video${available === 1 ? "" : "s"}` : ""}</p>
           </div>
         </div>
@@ -7036,6 +7045,42 @@
         ${videos.map(renderVideoCard).join("")}
       </div>
     `;
+  }
+
+  function renderPlaylist(slug) {
+    const series = findSeriesBySlug(slug);
+    if (!series) {
+      renderShell(`
+        <main class="error-state">
+          <div>
+            <h1>Playlist not found</h1>
+            <p>The selected resource series is unavailable.</p>
+            <p><a class="nav-button" href="${homeUrl()}">Back to videos</a></p>
+          </div>
+        </main>
+      `);
+      return;
+    }
+
+    const videos = (series.videos || []).map((video) => ({
+      ...video,
+      seriesTitle: series.title,
+    }));
+    const available = videos.length;
+
+    renderShell(`
+      <main class="playlist-layout">
+        <section class="playlist-head">
+          <p class="eyebrow">Playlist</p>
+          <h1>${escapeHtml(series.title)}</h1>
+          <p>${series.parts} ${series.parts === 1 ? "Part" : "Parts"}${available ? ` • ${available} video${available === 1 ? "" : "s"}` : ""}</p>
+          <a class="nav-button" href="${homeUrl()}">Back to all resources</a>
+        </section>
+        ${available ? renderVideoGrid(videos) : `<div class="empty-resource">No matched Vimeo videos found for this resource yet.</div>`}
+      </main>
+    `);
+
+    bindVideoCardEvents();
   }
 
   function renderVideoCard(video, index) {
@@ -7088,13 +7133,16 @@
       renderHome();
     });
 
+    bindVideoCardEvents();
+  }
+
+  function bindVideoCardEvents() {
     document.querySelectorAll("[data-video-id]").forEach((card) => {
       card.addEventListener("click", () => {
         const id = card.getAttribute("data-video-id");
         window.location.href = videoUrl({ id });
       });
     });
-
   }
 
   function renderWatch(videoId) {
@@ -7114,7 +7162,10 @@
       return;
     }
 
-    const upNext = state.videos.filter((item) => item.id !== video.id).slice(0, 8);
+    const sameSeries = video.seriesTitle
+      ? state.videos.filter((item) => item.seriesTitle === video.seriesTitle && item.id !== video.id)
+      : [];
+    const upNext = (sameSeries.length ? sameSeries : state.videos.filter((item) => item.id !== video.id)).slice(0, 12);
     const embedUrl = buildVimeoEmbedUrl(video, { autoplay: true });
     const title = displayTitle(video.title);
 
@@ -7144,7 +7195,7 @@
           </div>
         </article>
         <aside class="up-next">
-          <h2>Up Next</h2>
+          <h2>${escapeHtml(video.seriesTitle ? `More from ${video.seriesTitle}` : "Up Next")}</h2>
           <div class="next-list">
             ${upNext.map(renderNextItem).join("")}
           </div>
@@ -7169,9 +7220,14 @@
   function route() {
     const hashRoute = window.location.hash.replace(/^#\/?/, "");
     const pathRoute = window.location.pathname.replace(/^\/+/, "");
-    const activeRoute = pathRoute.startsWith("watch/") ? pathRoute : hashRoute;
+    const activeRoute = pathRoute.startsWith("watch/") || pathRoute.startsWith("playlist/") ? pathRoute : hashRoute;
     if (activeRoute.startsWith("watch/")) {
       renderWatch(decodeURIComponent(activeRoute.slice("watch/".length)));
+      window.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
+    if (activeRoute.startsWith("playlist/")) {
+      renderPlaylist(decodeURIComponent(activeRoute.slice("playlist/".length)));
       window.scrollTo({ top: 0, behavior: "auto" });
       return;
     }
